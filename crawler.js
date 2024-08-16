@@ -1,38 +1,51 @@
 const {load} = require("cheerio")
+const fs = require("fs/promises")
+const os = require("os")
 
-async function crawlURL(url){
-    const response = await fetch(url);
+async function crawlURL(url) {
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const $ = load(html);
 
-    const html = await response.text();
-    const $ = load(html);
+        // Extract all link elements
+        const discoveredLinkElements = $("a[href]");
+        const discoveredLinks = [];
 
-    // Extract all link elements
-    const discoveredLinkElements = $("a[href]");
+        discoveredLinkElements.each((_, a) => {
+            const href = $(a).attr("href");
+            
+            if (href) {
+                // Only proceed if the href is not empty
+                try {
+                    const absoluteUrl = new URL(href, url).href; // Normalize to absolute URL
+                    discoveredLinks.push(absoluteUrl);
+                } catch (err) {
+                    console.error(`Skipping invalid URL: ${href}`);
+                }
+            }
+        });
 
-    const discoveredLinks = [];
-    discoveredLinkElements.each((_, a) =>{
-        discoveredLinks.push($(a).attr("href"))
-    });
+        const baseURL = "https://scrapeme.live/";
+        const filteredDiscoveredLinks = discoveredLinks.filter((link) => {
+            return (
+                link.startsWith(baseURL) &&
+                !link.startsWith(`${baseURL}/wp-admin`) &&
+                !link.includes("wp-admin/admin-ajax.php")
+            );
+        });
 
-    const baseURL = "https://scrapeme.live/"
-    const filterDiscoveredLinks = discoveredLinks.filter((url) =>{
-        return (
-            url.startsWith(baseURL) &&
-            (!url.startsWith(`${baseURL}/wp-admin`)) || `${baseURL}/wp-admin/admin-ajax.php`
-        )
-    });
-    
-    return filterDiscoveredLinks
+        return filteredDiscoveredLinks;
+    } catch (error) {
+        console.error(`Failed to crawl ${url}: ${error}`);
+        return [];
+    }
 }
 
 async function crawlSite() {
     const pagesToCrawl = ["https://scrapeme.live/shop"]
     const pagesCrawled = []
     const discoveredURLs = new Set()
-
-    // crawl the entry point page
-    const page = pagesToCrawl.pop()
-    const pageDiscoveredURLs = await crawlURL(page)
 
     // Crawling Logic
     while(
@@ -55,6 +68,12 @@ async function crawlSite() {
         pagesCrawled.push(currentPage)
         console.log(`${discoveredURLs.size} URLs discovered so far...`)
     }
+
+    const csvContent = [...discoveredURLs].join(os.EOL)
+    // export the CSV string to an output file
+    await fs.writeFile("output.csv", csvContent)
+
+    
 }
 
 crawlSite()
