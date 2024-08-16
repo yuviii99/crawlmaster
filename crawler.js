@@ -33,6 +33,28 @@ async function crawlSite() {
     // crawl the entry point page
     const page = pagesToCrawl.pop()
     const pageDiscoveredURLs = await crawlURL(page)
+
+    // Crawling Logic
+    while(
+        pagesToCrawl.length !== 0 && discoveredURLs.size <= 300
+    ){
+        const currentPage = pagesToCrawl.pop()
+        console.log(`Crawling Page: ${currentPage}`)
+
+        const pageDiscoveredURLs = await crawlURL(currentPage)
+        pageDiscoveredURLs.forEach(url => {
+            discoveredURLs.add(url)
+            if(
+                !pagesCrawled.includes(url) && url!== currentPage
+            ){
+                pagesToCrawl.push(url)
+            }
+        })
+        console.log(`${pageDiscoveredURLs.length} URLs found`)
+
+        pagesCrawled.push(currentPage)
+        console.log(`${discoveredURLs.size} URLs discovered so far...`)
+    }
 }
 
 crawlSite()
