@@ -1,7 +1,8 @@
 const {load} = require("cheerio")
 
-async function crawlSite(){
-    const response = await fetch("https://scrapeme.live/shop");
+async function crawlURL(url){
+    const response = await fetch(url);
+
     const html = await response.text();
     const $ = load(html);
 
@@ -20,6 +21,8 @@ async function crawlSite(){
             (!url.startsWith(`${baseURL}/wp-admin`)) || `${baseURL}/wp-admin/admin-ajax.php`
         )
     });
+    
+    return filterDiscoveredLinks
 }
 
-crawlSite();
+crawlURL("https://scrapeme.live/shop")
