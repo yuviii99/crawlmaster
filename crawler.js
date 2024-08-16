@@ -7,6 +7,11 @@ async function crawlSite(){
 
     // Extract all link elements
     const discoveredLinkElements = $("a[href]");
+
+    const discoveredLinks = [];
+    discoveredLinkElements.each((_, a) =>{
+        discoveredLinks.push($(a).attr("href"))
+    });
 }
 
 crawlSite();
