@@ -1,9 +1,12 @@
 const {load} = require("cheerio")
 
 async function crawlSite(){
-    const response = await fetch("https://scrapeme.live/shop")
-    const html = await response.text()
-    const $ = load(html)
+    const response = await fetch("https://scrapeme.live/shop");
+    const html = await response.text();
+    const $ = load(html);
+
+    // Extract all link elements
+    const discoveredLinkElements = $("a[href]");
 }
 
 crawlSite();
