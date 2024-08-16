@@ -25,4 +25,14 @@ async function crawlURL(url){
     return filterDiscoveredLinks
 }
 
-crawlURL("https://scrapeme.live/shop")
+async function crawlSite() {
+    const pagesToCrawl = ["https://scrapeme.live/shop"]
+    const pagesCrawled = []
+    const discoveredURLs = new Set()
+
+    // crawl the entry point page
+    const page = pagesToCrawl.pop()
+    const pageDiscoveredURLs = await crawlURL(page)
+}
+
+crawlSite()
