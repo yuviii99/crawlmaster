@@ -12,6 +12,14 @@ async function crawlSite(){
     discoveredLinkElements.each((_, a) =>{
         discoveredLinks.push($(a).attr("href"))
     });
+
+    const baseURL = "https://scrapeme.live/"
+    const filterDiscoveredLinks = discoveredLinks.filter((url) =>{
+        return (
+            url.startsWith(baseURL) &&
+            (!url.startsWith(`${baseURL}/wp-admin`)) || `${baseURL}/wp-admin/admin-ajax.php`
+        )
+    });
 }
 
 crawlSite();
